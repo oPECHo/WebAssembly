@@ -1,0 +1,31 @@
+<!doctype html> 
+<html> 
+  <head> 
+    <meta charset="utf-8"> 
+    <title>WebAssembly Add Function</title>
+  </head>
+  <body>
+    <div style="font-size: 30px; text-align: center; color: orange;" id="hello-world"></div>
+    <script>
+      async function loadWasm() {
+        let response = await fetch('hello.wasm');
+        let arrayBuffer = await response.arrayBuffer();
+        let compiledModule = await WebAssembly.compile(arrayBuffer);
+        let instance = await WebAssembly.instantiate(compiledModule);
+        console.log(instance);
+        let buffer = new Uint8Array(instance.exports.memory.buffer);
+        
+        let ref = instance.exports._Z7c_hellov();
+        let mytext = '';
+        // Read the string from memory until we encounter a null terminator
+        for (let i = ref; buffer[i] !== 0; i++) { // read memory address ที่ละตัวจนกว่าจะเจอค่า null
+          mytext += String.fromCharCode(buffer[i]);
+        }
+        console.log(mytext); 
+        document.getElementById("hello-world").innerHTML = mytext;
+      }
+      
+      loadWasm();
+    </script>
+  </body>
+</html>
